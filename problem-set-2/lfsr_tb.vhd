@@ -13,11 +13,11 @@ architecture complex of lfsr_tb is
   -- clock signal
   signal clock : std_logic :=  '0';
   -- lines for loading-up LFSRs
-  signal q1,q2 : std_logic_vector(15 downto 0) := (others => '0');
+  signal q1, q2 : std_logic_vector(15 downto 0) := (others => '0');
   -- signal to start loading LFSRs
   signal load  : std_logic := '0';
   -- outputs from LFSRs
-  signal LFSR1,LFSR2 : std_logic;
+  signal LFSR1, LFSR2 : std_logic;
 
   -- just a reminder what will be tested
   component lfsr 
@@ -50,7 +50,7 @@ begin
     -- time to tell LFSRs to load up some data
     load <= '1';
     -- and give it to them (to one of them, at least)
-    q2 <= X"FAFA";
+    q2 <= x"0000";
     -- even though LFSRs are async, let's wait for a bit...
     wait until clock'event and clock = '0';
     -- ... and let them run freely
