@@ -27,7 +27,7 @@ BEGIN
   BEGIN
     -- note that if 'ld = 1' then, regardless of clk the LFSR
     -- will read external data; that's why it's __asynchronous__
-    if(ld = '1') 
+    if(ld = '1')
     then
       q <= data;
     -- however, if 'ld' is not operational, then 'clk' will 
@@ -69,26 +69,3 @@ BEGIN
   R <= q(15);
 	
 END second;
-
-
--- another architecture of the same entity 'lfsr'
-ARCHITECTURE third OF lfsr IS
-  signal q : STD_LOGIC_VECTOR(15 downto 0) := (OTHERS => '0');
-BEGIN
-
-  PROCESS(clk, ld, data)
-  BEGIN
-    if(ld = '1') 
-    then
-      q <= data;
-    elsif(clk'event and clk = '1')
-    then
-	    q(15 downto 1) <= q(14 downto 0);
-      -- taps at bits 15, 10, 9 and 1
-	    q(0) <= not(q(15) XOR q(10) XOR q(9) XOR q(1));
-    end if;
-  END PROCESS;
-
-  R <= q(15);
-	
-END third;

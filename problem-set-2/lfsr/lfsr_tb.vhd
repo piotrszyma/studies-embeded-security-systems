@@ -29,7 +29,7 @@ architecture complex of lfsr_tb is
   end component;
 
   -- remember? we defined two architectures for 'lfsr'
-  for UUT1 : lfsr use entity work.lfsr(first);
+  for UUT1 : lfsr use entity work.lfsr(first); -- unit under test
   for UUT2 : lfsr use entity work.lfsr(second);
 
 begin
@@ -50,7 +50,7 @@ begin
     -- time to tell LFSRs to load up some data
     load <= '1';
     -- and give it to them (to one of them, at least)
-    q2 <= x"0000";
+    q2 <= x"FAFA";
     -- even though LFSRs are async, let's wait for a bit...
     wait until clock'event and clock = '0';
     -- ... and let them run freely
