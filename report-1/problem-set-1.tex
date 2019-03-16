@@ -22,6 +22,31 @@ to the console.
 
 \subsection{Assignment 3}
 
-Here I've learned what are the basic
+Here I've learned what are the basic ,,VHDL'' entities - what is required for
+a valid ,,VHDL'' program:
+\begin{enumerate}
+  \item entity - the most basic building block in ,,VHDL''.
+  \item architecture - description of entity's behaviour.
+  \item port - definition of in and out connections to the entity.
+  \item component - in the testbench, or more generally, in external entity,
+        is a definition of expected ports from another entity, for e. g.
+        in testbench, component statement contained definition of how the
+        tested entity looks like - what are it's expected ports.
+  \item process - basic unit of execution in ,,VHDL''.
+\end{enumerate}
+I also learned the basics about testing - how to create and use testbenches
+for created entities and how to analyze tests output - using \textit{gtkwave}.
+I've interacted with simple program and it's testbench.
 
 \subsection{Assignment 4}
+
+This problem was a sumup of all previous tasks. The goal here was to create
+an entity that using three input ports, called \texttt{A}, \texttt{B} and
+\texttt{C} calculated output values \texttt{X} and \texttt{Y} defined as
+follows:
+
+$$ x \leftarrow \neg (\neg(a \lor b) \lor (b \lor c)) $$
+$$ y \leftarrow (b \lor c) \land \neg(a \oplus c) $$
+
+Created entity had been tested using testbench. A logic table was created
+and output generated using created entity was compared to expected values.
