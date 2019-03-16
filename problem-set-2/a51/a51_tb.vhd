@@ -63,7 +63,7 @@ begin
     -- time to tell LFSRs to load up some data
     load <= '1';
     -- and give it to them (to one of them, at least)
-    iv <= x"AAAAAAAAAAAAAAAA";
+    iv <= x"AABAACAAAAAAAAAA";
     -- even though LFSRs are async, let's wait for a bit...
     wait until clock'event and clock = '0';
     -- ... and let them run freely

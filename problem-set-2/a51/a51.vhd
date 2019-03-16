@@ -20,6 +20,7 @@ ARCHITECTURE first OF a51 IS
   signal q1 : STD_LOGIC_VECTOR(18 downto 0) := (OTHERS => '0');
   signal q2 : STD_LOGIC_VECTOR(21 downto 0) := (OTHERS => '0');
   signal q3 : STD_LOGIC_VECTOR(22 downto 0) := (OTHERS => '0');
+  signal major : STD_LOGIC;
 BEGIN
 
   -- this process will be executed each time
@@ -35,17 +36,53 @@ BEGIN
       q2 <= data(40 downto 19);
       q3 <= data(63 downto 41);
     -- however, if 'ld' is not operational, then 'clk' will 
-    -- cause the state change
+    -- cause the state changeXOR
     elsif(clk'event and clk = '1')
     then
       -- cyclic shift - as simple as that
-      q1(18 downto 1) <= q1(17 downto 0);
-      q2(21 downto 1) <= q2(20 downto 0);
-      q3(22 downto 1) <= q3(21 downto 0);
+      -- q1 8
+      -- q2 10
+      -- q3 10
 
-      q1(0) <= q1(18) XOR q1(17) XOR q1(16) XOR q1(13);
-      q2(0) <= q2(21) XOR q2(20);
-      q3(0) <= q3(22) XOR q3(21) XOR q3(20) XOR q3(7);
+      -- 1 1 1
+      -- 0 0 0
+      -- 0 1 0
+      -- 0 0 1
+      -- 1 0 0
+      -- 0 1 1
+      -- 1 0 1
+      -- 1 1 0
+
+      if (q1(8) xor q2(10)) = '0' then
+        major <= q1(8);
+      elsif (q2(10) xor q3(10)) = '0' then
+        major <= q2(10);
+      else
+        major <= q3(10);
+      end if;
+
+      if q1(8) = major then
+          q1(18 downto 1) <= q1(17 downto 0);
+          q1(0) <= q1(18) XOR q1(17) XOR q1(16) XOR q1(13);
+      end if;
+
+      if q2(10) = major then      
+        q2(21 downto 1) <= q2(20 downto 0);
+        q2(0) <= q2(21) XOR q2(20);
+      end if;
+
+      if q3(10) = major then      
+        q3(22 downto 1) <= q3(21 downto 0);
+        q3(0) <= q3(22) XOR q3(21) XOR q3(20) XOR q3(7);
+      end if;
+
+      -- q1(18 downto 1) <= q1(17 downto 0);
+      -- q2(21 downto 1) <= q2(20 downto 0);
+      -- q3(22 downto 1) <= q3(21 downto 0);
+
+      -- q1(0) <= q1(18) XOR q1(17) XOR q1(16) XOR q1(13);
+      -- q2(0) <= q2(21) XOR q2(20);
+      -- q3(0) <= q3(22) XOR q3(21) XOR q3(20) XOR q3(7);
     end if;
   END PROCESS;
 
