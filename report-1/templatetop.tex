@@ -1,0 +1,35 @@
+\documentclass[12pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage{beramono}% monospaced font with bold variant
+\usepackage{graphicx}
+\usepackage{listings}
+\lstdefinelanguage{VHDL}{
+   morekeywords={
+     library,use,all,entity,is,port,in,out,end,architecture,of,
+     begin,and
+   },
+   morecomment=[l]--
+}
+
+\usepackage{xcolor}
+\colorlet{keyword}{blue!100!black!80}
+\colorlet{comment}{gray!90!black!90}
+\lstdefinestyle{vhdl}{
+   language     = VHDL,
+   basicstyle   = \footnotesize\ttfamily,
+   keywordstyle = \color{keyword}\bfseries,
+   commentstyle = \color{comment},
+}
+\begin{document}
+
+\include{titlepage}
+
+\section{Abstract}
+
+This report presents summary of my work done over first two problem sets
+during ,,Embedded Security Systems'' course Summer semester 2018/2019.
+
+\include{problem-set-1}
+\include{problem-set-2}
+
+\end{document}

@@ -11,7 +11,7 @@ entity lfsr is
 			);
 end lfsr;
 
--- there can be many architectures (aka "ways things work") 
+-- there can be many architectures (aka "ways things work")
 -- defined for a given entity. here we define two, that differ
 -- in places where taps are located
 ARCHITECTURE first OF lfsr IS
@@ -30,7 +30,7 @@ BEGIN
     if(ld = '1')
     then
       q <= data;
-    -- however, if 'ld' is not operational, then 'clk' will 
+    -- however, if 'ld' is not operational, then 'clk' will
     -- cause the state change
     elsif(clk'event and clk = '1')
     then
@@ -42,10 +42,10 @@ BEGIN
   END PROCESS;
 
   -- this is not a part of the process - this assignment is
-  -- permanent, i.e. "it's always there" - just like a wire 
+  -- permanent, i.e. "it's always there" - just like a wire
   -- connecting MSB to the output
   R <= q(15);
-	
+
 END first;
 
 -- another architecture of the same entity 'lfsr'
@@ -55,7 +55,7 @@ BEGIN
 
   PROCESS(clk, ld, data)
   BEGIN
-    if(ld = '1') 
+    if(ld = '1')
     then
       q <= data;
     elsif(clk'event and clk = '1')
@@ -67,5 +67,5 @@ BEGIN
   END PROCESS;
 
   R <= q(15);
-	
+
 END second;
