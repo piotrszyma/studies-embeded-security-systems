@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity a51 is
-  Port ( 
+  Port (
     clk : in std_logic;
     ld : in std_logic;
     data : in std_logic_vector(63 downto 0) := (others => '0');
@@ -11,7 +11,7 @@ entity a51 is
   );
 end a51;
 
--- there can be many architectures (aka "ways things work") 
+-- there can be many architectures (aka "ways things work")
 -- defined for a given entity. here we define two, that differ
 -- in places where taps are located
 ARCHITECTURE first OF a51 IS
@@ -22,37 +22,15 @@ ARCHITECTURE first OF a51 IS
   signal q3 : STD_LOGIC_VECTOR(22 downto 0) := (OTHERS => '0');
   signal major : STD_LOGIC;
 BEGIN
-
-  -- this process will be executed each time
-  -- a change in either of the signals: clk, ld, data
-  -- is detected. this is the "sensitivity list"
   PROCESS(clk, ld, data)
   BEGIN
-    -- note that if 'ld = 1' then, regardless of clk the LFSR
-    -- will read external data; that's why it's __asynchronous__
-    if(ld = '1') 
+    if(ld = '1')
     then
       q1 <= data(18 downto 0);
       q2 <= data(40 downto 19);
       q3 <= data(63 downto 41);
-    -- however, if 'ld' is not operational, then 'clk' will 
-    -- cause the state changeXOR
     elsif(clk'event and clk = '1')
     then
-      -- cyclic shift - as simple as that
-      -- q1 8
-      -- q2 10
-      -- q3 10
-
-      -- 1 1 1
-      -- 0 0 0
-      -- 0 1 0
-      -- 0 0 1
-      -- 1 0 0
-      -- 0 1 1
-      -- 1 0 1
-      -- 1 1 0
-
       if (q1(8) xor q2(10)) = '0' then
         major <= q1(8);
       elsif (q2(10) xor q3(10)) = '0' then
@@ -66,28 +44,16 @@ BEGIN
           q1(0) <= q1(18) XOR q1(17) XOR q1(16) XOR q1(13);
       end if;
 
-      if q2(10) = major then      
+      if q2(10) = major then
         q2(21 downto 1) <= q2(20 downto 0);
         q2(0) <= q2(21) XOR q2(20);
       end if;
 
-      if q3(10) = major then      
+      if q3(10) = major then
         q3(22 downto 1) <= q3(21 downto 0);
         q3(0) <= q3(22) XOR q3(21) XOR q3(20) XOR q3(7);
       end if;
-
-      -- q1(18 downto 1) <= q1(17 downto 0);
-      -- q2(21 downto 1) <= q2(20 downto 0);
-      -- q3(22 downto 1) <= q3(21 downto 0);
-
-      -- q1(0) <= q1(18) XOR q1(17) XOR q1(16) XOR q1(13);
-      -- q2(0) <= q2(21) XOR q2(20);
-      -- q3(0) <= q3(22) XOR q3(21) XOR q3(20) XOR q3(7);
     end if;
   END PROCESS;
-
-  -- this is not a part of the process - this assignment is
-  -- permanent, i.e. "it's always there" - just like a wire 
-  -- connecting MSB to the output
   result <= q1(18) XOR q2(21) XOR q3(22);
 END first;

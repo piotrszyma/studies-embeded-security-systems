@@ -18,3 +18,4 @@ __*
 .DS_Store
 *.bib
 *.pdf
+.venv

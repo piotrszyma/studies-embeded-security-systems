@@ -1,12 +1,12 @@
 \documentclass[12pt]{article}
 \usepackage[T1]{fontenc}
-\usepackage{beramono}% monospaced font with bold variant
+\usepackage[scaled]{beramono}% monospaced font with bold variant
 \usepackage{graphicx}
 \usepackage{listings}
 \lstdefinelanguage{VHDL}{
    morekeywords={
      library,use,all,entity,is,port,in,out,end,architecture,of,
-     begin,and
+     begin,and,if,elsif,else,then,signal
    },
    morecomment=[l]--
 }
@@ -20,6 +20,7 @@
    keywordstyle = \color{keyword}\bfseries,
    commentstyle = \color{comment},
 }
+
 \begin{document}
 
 \include{titlepage}
