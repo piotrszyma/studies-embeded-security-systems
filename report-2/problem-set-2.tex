@@ -144,5 +144,10 @@ In the \texttt{Python} code, two methods, \texttt{send\_message} and
 
  The \texttt{send\_message} method is simple and only encrypts, adds counter value and passes the cypher to Arduino (which sends it three times). The \texttt{read\_message} is much more sophisticated. First of all, it contains \texttt{read\_data} method that parses the input from Ardunio. Secondly, it has logic responsible for parsing incoming messages and their corresponding counters based on counter state so it can recreate the cypher from chunks. After receiving all chunks (got $ctr$ value $255$) it decrypts message by concatenating most popular of values for all chunks and applying bits` generated from A5/1. The decrypted message is being returned by the method.
 
+% Add listing of implementations of send_message and receive_message
+
+
  \subsubsection{Hardware implementation}
 The hardware for our assignment contained of two Arduinos Uno with external IR diode and IR receiver connected to pins. Moreover, both Arduinos shared two wires to enable two way wire communication. Each of the Arduinos was controlled via the USB cable with PC machines running \texttt{Python} scripts.
+
+% Add circuit project.
