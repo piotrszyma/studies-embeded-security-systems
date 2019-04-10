@@ -1,4 +1,7 @@
+
 \documentclass[12pt]{article}
+\usepackage{polski}
+\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[scaled]{beramono}% monospaced font with bold variant
 \usepackage{graphicx}
@@ -19,6 +22,23 @@
    basicstyle   = \footnotesize\ttfamily,
    keywordstyle = \color{keyword}\bfseries,
    commentstyle = \color{comment},
+}
+\lstdefinestyle{cpp}{
+  language=C++,
+  basicstyle   = \footnotesize\ttfamily,
+  keywordstyle=\color{blue}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  commentstyle=\color{green}\ttfamily,
+  morecomment=[l][\color{magenta}],
+}
+
+\lstdefinestyle{python}{
+  language=Python,
+  basicstyle   = \footnotesize\ttfamily,
+  keywordstyle=\color{blue}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  commentstyle=\color{green}\ttfamily,
+  morecomment=[l][\color{magenta}],
 }
 
 \begin{document}
