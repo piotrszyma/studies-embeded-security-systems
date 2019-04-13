@@ -6,22 +6,18 @@ and how oscilloscope works.
 
 \subsection{Assignment}
 
-I've received two \texttt{logicdata} files with data from some remote in binary form
-via email from the lecturer. I've opened those files using \texttt{Saleae Logic}
-software as \texttt{logicdata} is a \texttt{Saleae Logic} specific binary format.
-File \texttt{sample15.logicdata} contained 4 seconds of data in two channels.
-Channel number 2 contained some interesting signal. I've analyzed the source on
-channel 2 using ,,Async Serial'' with default values, that is: bit rate of
-9600 bauds and, as it was stated as default in program, 8 bits per transfer,
-1 stop bit, no partity bit, LSB sent first and not inverted. I did not use any
-special mode.
+I've received two \texttt{logicdata} files with data from some remote in binary form via email from the lecturer.
 
-As a result of analysis, in ,,Decoded protocols'' window of \texttt{Saleae Logic}
-application a list of decoded protocols was displayed. Program detected many
-similar repeating sequences of bits \texttt{0b 1110 0000}.
+\subsubsection{Analysis}
 
-I've repated the operations mentioned before on \texttt{sample16.logicdata} and
-obtained similar results. One more thing worth mentioning was that analyzer
-encountered some problems during evaluation of protocols - for both logic data
-files it detected some unrecognize sequences with ,,framing error''. I assumed
-that was malformed data.
+For the analysis of the program I've used two tools. First of them, ,,Saleae Logic'', has some built in protocol analyzers, but none of them was sufficient. I've analyzed the source with ,,Async Serial'' on channel 2, but it only detected many similar repeating sequences of bits \texttt{0b 1110 0000} and some data errors.
+
+% TODO: Try to add new analyzer and analyze it using it.
+
+The next attempt to analyze the signal was done using ,,PulseView'' program. This time, the result was positive. Thanks to that program I've concluded that the protocol used to emit the analyzed signal was \texttt{NEC}.
+
+\subsubsection{Retransmitter}
+
+To create retransmitter I've created a simple Arduino program using IR receiver and IR diode.
+
+% TODO: Add more details (hehe)

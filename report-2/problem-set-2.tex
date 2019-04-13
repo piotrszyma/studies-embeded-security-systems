@@ -132,7 +132,7 @@ In the,,master'' method, python code generates random IV vector and sends it usi
 
 When IV value is established, both parts generates PRNG and master can send message. (Our assumption is that master is always the one that sends the message first) In the meantime, slave is expecting a message received from master. Basically, the whole send - receive procedure can work same way in the other direction. What's worth mention is how the encryption and decryption protocol with data check works under the hood. As we've discovered at the beginning of our work, IR connection had data malform issues quite often and the initial approach of sending all the cypher data byte by byte was not effective. Based on those problems we've decided to introduce verification part. In our protocol: 
 \begin{itemize}
-  \item {All the messages can have length of at most 253 characters.}
+  \item {All the messages can have length of at most 254 characters.}
   \item {All of the messages are sent in 2 bytes chunks - leftmost bits are counter (starting with 1) and rightmost are the values of cypher.}
   \item {Each of the chunk is being retransmitted 2 times - so transmitted 3 times alltogether. }
   \item { Counter value of 255 is restricted and means the end of message.}
@@ -146,8 +146,10 @@ In the \texttt{Python} code, two methods, \texttt{send\_message} and
 
 % Add listing of implementations of send_message and receive_message
 
-
  \subsubsection{Hardware implementation}
 The hardware for our assignment contained of two Arduinos Uno with external IR diode and IR receiver connected to pins. Moreover, both Arduinos shared two wires to enable two way wire communication. Each of the Arduinos was controlled via the USB cable with PC machines running \texttt{Python} scripts.
 
 % Add circuit project.
+
+\subsubsection{Paralellel cypher and secret transmission}
+The case mentioned above was not the only one required to implement. The second case, similar in most practical aspects, was about parallel transmissions using both wire and wireless connections. In that case we've modified code of our Arduino logic and Python program from case 1 so that the source of transmission was only master. When master sends message (using \texttt{send\_message} method), the logic under the hood, for each symbol in the message, generates cypher (in a simmiliar manner to the first case) and sends - the single encrypted character using IR diode and bits generated from A5/1 used to XOR with original character. For the slave entity, \texttt{read\_message} was used. It expected to receive single message both via the wire connection and wireless one. The way Python code distinguished messages received on Serial was that the IR receiver output was prefixed with \texttt{C:} and wire output was prefixed with \texttt{S:}.     
