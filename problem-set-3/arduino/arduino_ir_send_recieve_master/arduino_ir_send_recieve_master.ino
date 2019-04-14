@@ -47,7 +47,7 @@ void setup() {
     }
   }
   irrecv.enableIRIn();
-  communication.print(IV);                                                                                              
+  communication.print(IV);
 }
 
 void loop() {
@@ -67,6 +67,6 @@ void loop() {
   }
   if (irrecv.decode(&results)) {
     Serial.println(results.value, BIN);
-    irrecv.resume(); 
+    irrecv.resume();
   }
 }
