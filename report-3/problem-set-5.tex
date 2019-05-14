@@ -1,9 +1,146 @@
 \section{Problem set 5}
 \subsection{Preface}
 
-The goal of this problem set was brief introduction to work with IrDA transmission
-and how oscilloscope works.
+The goal of this assignment was to break an embedded system.
 
 \subsection{Assignment}
 
-I've received two \texttt{logicdata} files with data from some remote in binary form via email from the lecturer.
+\subsubsection{Prerequisites}
+
+The lecturer provided us an \texttt{Arduino} platform with some code embedded in it. Moreover, we were given a context in which we operated:
+
+\begin{itemize}
+  \item Received system was a controller of a CCTV camera.
+  \item The driver ,,CameraKey'' was known - it was shown on device startup.
+  \item {
+    We had access to the manual of the driver - assumption was that it was      available on the internet, we just searched the internet for it based
+    on the name of the driver.
+  }
+  \item System controled the frequency under which the CCTV camera operates.
+\end{itemize}
+
+% Manual reference: http://cs.pwr.edu.pl/blaskiewicz/dydaktyka/embedded-security/CameraKey.html
+
+\subsubsection{Goal}
+
+The goal of the assignment was to change the frequency of the CCTV camera controlled by the device we've received.
+
+\subsubsection{Challenges}
+\label{seq:challenges}
+
+Based on informations from the manual of ,,CameraKey'', we've established that to change the frequency, we had to:
+
+\begin{itemize}
+  \item Boot the device in administrator mode
+  \item Provide administrator password
+\end{itemize}
+
+\subsubsection{Booting the device}
+
+As the manual stated (subsection \ref{seq:challenges}), first of all, we had to boot the device in the administrator mode. To do that, ,,the control PIN'' had to be held LOW during boot. As we know, \texttt{Arduino} has 14 main PINs - our assumption was that one of them might be possible ,,control'' PIN.  To get ,,the control PIN'', we had to try to boot device at most 14 times. We've connected a cable to \texttt{GND} PIN from one side and started looking for ,,control'' PIN from PIN \#13 in decreasing order. On our luck, the control PIN was the next the starting PIN - it was PIN \#12.
+
+Device was protected by a PIN code when running in administrator mode. As first, to break the PIN code, we've chosen naive brute force approach. We've assumed that PIN must by of length 4 and consist only of numbers. The device was not protected against brute force attack and thanks to that, in around 10 minutes, we've got the PIN - 5789. Later on, we've improved our attack by introduction of timing attack. The previous one required up to 10000 checks, whereas the new attack required only up to 40. In this case we've measured time required for the device to response for PINs starting with same suffix but different first number. For 9 numbers the time was almost the same, for one of them, it was a little bit longer. Based on that we've predicted first number. We've repeated same queries for the second, third and fourth digit. In this case, the PIN was known after less than 3 seconds. The advantage of the second approach was that it was more scalable. For input of length 10, it required up to $10^2$ requests, whereas the bruteforce approach up to $10 ^ {10}$.
+
+\subsubsection{Retreiving administrator password}
+
+Having PIN number and ,,control PIN'', next task was to hack the administrator password. Using system interface, we've used help command - \texttt{?} - to get controls.
+
+\begin{minipage}{\linewidth}
+  \begin{lstlisting}[
+    style=cpp,
+    caption={Output of \texttt{?} command.},
+    captionpos=b,
+    label={fig:master-arduino-init}
+  ]
+18:45:06.325 -> [c]hange frequency <number>
+18:45:06.325 -> [d]ump current frequency
+18:45:06.362 -> [l]ist files
+18:45:06.362 -> [s]how file <number>
+18:45:06.362 -> [?] - help
+  \end{lstlisting}
+  \end{minipage}
+
+Based on help instruction, using \texttt{l} command we've listed all the files on the device.
+
+\begin{minipage}{\linewidth}
+  \begin{lstlisting}[
+    style=cpp,
+    caption={Output of \texttt{l} command.},
+    captionpos=b,
+    label={fig:master-arduino-init}
+  ]
+18:45:43.539 -> 1: version.txt
+18:45:43.539 -> 2: passwd
+  \end{lstlisting}
+  \end{minipage}
+
+Device contained of two files, ,,passwd'' and ,,version.txt''. After executing command \texttt{s 2} and \texttt{s 3} , we've got a password hash and possible firmware version.
+
+
+\begin{minipage}{\linewidth}
+  \begin{lstlisting}[
+    style=cpp,
+    caption={Output of \texttt{s 2} \& \texttt{s 3} commands.},
+    captionpos=b,
+    label={fig:master-arduino-init}
+  ]
+18:46:10.152 -> fee44f690b2d81480f0c628f6105b05a
+18:47:12.123 -> 0.891.1
+  \end{lstlisting}
+  \end{minipage}
+
+Having password hash, we had to break it. Our general idea was to use a dictionary attack. For the dictionary attack, we've setup a tool that is very popular for the purpose of hash breaking based on dictionary attack - \texttt{hashcat}. ›At first we've used ,,google-10000-english'' words database, unfortunately that did not work. The next idea was to use the list of most common polish words from database available at ,,Wikitionary'' - our assumption was that the driver providing company is - based on the data of the manual authors - from Poland. After the second attempt failed, we've decided create a wordlist from all the words available in the manual. This attempt also failed.
+
+After that, we've decided to merge all three dictionaries and make use of the ,,version'' parameter, which, as stated in the manual, is required to obtain forgotten password. Based on that, we've tried to retry the dictionary attack and set the version parameter as salt for the hash... and it worked! Listing \ref{lst:hashcat} contains output from hashcat.
+
+\begin{minipage}{\linewidth}
+  \begin{lstlisting}[
+    style=cpp,
+    caption={Successful usage of \texttt{hashcat}.},
+    captionpos=b,
+    label={lst:hashcat}
+  ]
+>>> hashcat --force -m20 -O -w4 -a0 \
+    fee44f690b2d81480f0c628f6105b05a:0.891.1 ~/words_list
+hashcat (v5.1.0-954-gb6cc3c7d) starting...
+
+OpenCL Platform #1: Apple
+=========================
+* Device #1: Intel(R) Core(TM) i7-4770HQ CPU @ 2.20GHz, skipped.
+* Device #2: Iris Pro, 384/1536 MB allocatable, 40MCU
+
+INFO: All hashes found in potfile! Use --show to display them.
+
+Started: Mon May 13 19:49:03 2019
+Stopped: Mon May 13 19:49:04 2019
+>>> hashcat --force -m20 -O -w4 -a0 \
+    fee44f690b2d81480f0c628f6105b05a:0.891.1 ~/words_list --show
+fee44f690b2d81480f0c628f6105b05a:0.891.1:Wojtek
+  \end{lstlisting}
+  \end{minipage}
+
+% TODO(szyma): Describe the password cracking phase.
+% English words: https://github.com/first20hours/google-10000-english
+% Wikitionary: https://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/Polish_wordlist
+
+% >>> import hashlib
+% >>> m = hashlib.md5()
+% >>> m.update(b'0.891.1')
+% >>> m.update(b'Wojtek')
+% >>> m.hexdigest()
+% 'fee44f690b2d81480f0c628f6105b05a'
+
+\subsection{Additional task - Bluetooth playground}
+
+After solving ,,the camera frequency problem'' we were equipped with Bluetooth module called \texttt{HC-05}. Our goal this time was to setup wireless communication between two PCs. One of the PCs was connected using Bluetooth module attached to Arduino, and the other connected with the Bluetooth module built-in it.
+
+The first task was to setup Bluetooth module on Arduino on the first PC. To communicate Arduino with PC, we've created a simple echo program that retransmitted every byte from USB port into Bluetooth and from Bluetooth into USB port - that made any signal received from Bluetooth to be sent to PC and all the signals from PC sent further to Bluetooth. When the software logic was done, we've setup wire connection between Arduino and Bluetooth module.
+
+HC-05 required the following setup:
+% TODO: Describe connection of HC-05 to Arduino.
+
+\subsubsection{Running in AT mode}
+% TODO:
+% - describe BAUT rate change
+% - describe how to get into the mode
+% - describe some of the commands
