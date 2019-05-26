@@ -248,12 +248,17 @@ Got response: [b'1234\r\n']
   \end{lstlisting}
   \end{minipage}
 
+
+\subsubsection{Retreiving administrator password}
+
 \subsection{Additional task - Bluetooth playground}
 
 After solving ,,the camera frequency problem'' we were equipped with Bluetooth module called \texttt{HC-05}. Our goal this time was to setup wireless communication between two PCs. One of the PCs was connected using Bluetooth module attached to Arduino, and the other connected with the Bluetooth module built-in it. To communicate Arduino with PC, we've created a simple echo program that retransmitted every byte from USB port into Bluetooth and from Bluetooth into USB port - that made any signal received from Bluetooth to be sent to PC and all the signals from PC sent further to Bluetooth. When the software logic was done, we've setup wire connection between Arduino and Bluetooth module.
 
-\subsubsection{Running in AT mode}
-% TODO:
+
+
+% \subsubsection{Running in AT mode}
+% % TODO:
 % - describe BAUT rate change
 % - describe how to get into the mode
 % - describe some of the commands
