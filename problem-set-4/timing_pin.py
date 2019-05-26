@@ -9,7 +9,7 @@ import serial
 
 
 def main():
-  with serial.Serial('/dev/cu.usbmodem14101', 9600, timeout=1) as ser:
+  with serial.Serial('/dev/cu.usbserial-142210', 9600, timeout=1) as ser:
 
     for _ in range(2):
       ser.write(b'aaa')
