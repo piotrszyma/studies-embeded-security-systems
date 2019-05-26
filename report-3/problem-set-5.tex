@@ -150,7 +150,7 @@ Device contained of two files, ,,passwd'' and ,,version.txt''. After executing c
   \end{lstlisting}
   \end{minipage}
 
-Having password hash, we had to break it. Our general idea was to use a dictionary attack. For the dictionary attack, we've setup a tool that is very popular for the purpose of hash breaking based on dictionary attack - \texttt{hashcat}. At first we've used ,,google-10000-english'' words database, unfortunately that did not work. The next idea was to use the list of most common polish words from database available at ,,Wikitionary'' - our assumption was that the driver providing company is - based on the data of the manual authors - from Poland. After the second attempt failed, we've decided to create a wordlist from all the words available in the manual. This attempt also failed.
+Having password hash, we had to break it. Our general idea was to use a dictionary attack. For the dictionary attack, we've setup a tool that is very popular for the purpose of hash breaking based on dictionary attack - \texttt{hashcat}. At first we've used ,,google-10000-english'' words database, unfortunately that did not work. The next idea was to use the list of most common polish words from database available at ,,Wikitionary'' - our assumption was that the driver providing company is - based on the data of the manual authors - from Poland. After the second attempt failed, we've decided create a wordlist from all the words available in the manual. This attempt also failed.
 
 After that, we've decided to merge all three dictionaries and make use of the ,,version'' parameter, which, as stated in the manual, is required to obtain forgotten password. Based on that, we've tried to retry the dictionary attack and set the version parameter as salt for the hash... and it worked! Listing \ref{lst:hashcat} contains output from hashcat.
 
@@ -191,13 +191,14 @@ fee44f690b2d81480f0c628f6105b05a:0.891.1:Wojtek
 % >>> m.hexdigest()
 % 'fee44f690b2d81480f0c628f6105b05a'
 
+Having administrator password, I've created a program (attached on Listing \ref{fig:freq-change-prog}) that logs into admin mode and changes the frequency. It sends PIN to log in, sets new frequency using \texttt{c} command and dumps frequency \texttt{d}.
 
 \begin{minipage}{\linewidth}
   \begin{lstlisting}[
     style=python,
     caption={Changing frequency using found password.},
     captionpos=b,
-    label={fig:timing-attack}
+    label={fig:freq-change-prog}
   ]
   import time
 
@@ -229,12 +230,14 @@ fee44f690b2d81480f0c628f6105b05a:0.891.1:Wojtek
   \end{lstlisting}
 \end{minipage}
 
+Listing \ref{fig:out-freq-change-prog} shows the output of running the program from listing \ref{fig:freq-change-prog}. The frequency was changed to \texttt{1234} and later dumped using \texttt{d}. As it is showed in the output, frequency successfully changed to \texttt{1234}.
+
 \begin{minipage}{\linewidth}
   \begin{lstlisting}[
     style=cpp,
     caption={Output of frequency changing program.},
     captionpos=b,
-    label={fig:master-arduino-init}
+    label={fig:out-freq-change-prog}
   ]
 >>> python3 freq_change.py
 Sending b'5789'.
@@ -249,7 +252,65 @@ Got response: [b'1234\r\n']
   \end{minipage}
 
 
-\subsubsection{Retreiving administrator password}
+\subsubsection{Arduino code dump}
+
+To further investigate Arduino, I've decided to dump the code. To extract data from device, \texttt{avrdump} program was used.
+
+\begin{minipage}{\linewidth}
+  \begin{lstlisting}[
+    style=cpp,
+    caption={AVRdude usage to dump code from Arduino.},
+    captionpos=b,
+    label={fig:master-arduino-init}
+  ]
+>>> avrdude -c arduino \
+            -P /dev/cu.usbserial-142210 \
+            -p atmega328p \
+            -Uflash:r:d:\hexfiles\code.hex:i
+  \end{lstlisting}
+\end{minipage}
+Dumped data in \texttt{code.hex} file required further processing to be human-readable. I've used \texttt{hexdump} program to read the data.
+
+\begin{minipage}{\linewidth}
+  \begin{lstlisting}[
+    style=cpp,
+    caption={AVR-objdump used to extract data from dump.},
+    captionpos=b,
+    label={fig:master-arduino-init}
+  ]
+>>> avr-objdump -s -j .sec1 code.hex > code.dump
+  \end{lstlisting}
+\end{minipage}
+
+\begin{minipage}{\linewidth}
+  \begin{lstlisting}[
+    style=cpp,
+    caption={Part of dumped code.},
+    captionpos=b,
+    label={fig:dumpeddata}
+  ]
+  0050 0c94fb00 0c94fb00 0c94fb00 0c94fb00  ................
+  0060 0c94fb00 0c94fb00 70617373 77640076  ........passwd.v
+  0070 65727369 6f6e2e74 78740030 2e383931  ersion.txt.0.891
+  0080 2e310045 6e746572 2061646d 696e6973  .1.Enter adminis
+  0090 74726174 696f6e20 50494e3a 2000f9fb  tration PIN: ...
+  00a0 f4f52a2a 2a204144 4d494e20 4d4f4445  ..*** ADMIN MODE
+  00b0 202a2a2a 0043616d 6572614b 65792044   ***.CameraKey D
+  00c0 72697665 72202d20 32303139 005b3f5d  river - 2019.[?]
+  00d0 202d2068 656c7000 5b6c5d69 73742066   - help.[l]ist f
+  00e0 696c6573 0a5b735d 686f7720 66696c65  iles.[s]how file
+  00f0 203c6e75 6d626572 3e005b63 5d68616e   <number>.[c]han
+  0100 67652066 72657175 656e6379 203c6e75  ge frequency <nu
+  0110 6d626572 3e0a5b64 5d756d70 20637572  mber>.[d]ump cur
+  0120 72656e74 20667265 7175656e 6379004e  rent frequency.N
+  0130 6963652c 20747279 21204572 72436f64  ice, try! ErrCod
+  0140 653a2000 66656534 34663639 30623264  e: .fee44f690b2d
+  0150 38313438 30663063 36323866 36313035  81480f0c628f6105
+  0160 62303561 00456e74 65722061 646d696e  b05a.Enter admin
+  \end{lstlisting}
+\end{minipage}
+
+What is interesting, the hash of password was not obfuscated at all and could be read from dump (Listing \ref{fig:dumpeddata}) without even knowing PIN.
 
 \subsection{Additional task - Bluetooth playground}
 
