@@ -1,0 +1,58 @@
+
+\documentclass[12pt]{article}
+% \usepackage{polski}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[scaled]{beramono}% monospaced font with bold variant
+\usepackage{graphicx}
+\usepackage{listings}
+\lstdefinelanguage{VHDL}{
+   morekeywords={
+     library,use,all,entity,is,port,in,out,end,architecture,of,
+     begin,and,if,elsif,else,then,signal
+   },
+   morecomment=[l]--
+}
+
+\usepackage{xcolor}
+\colorlet{keyword}{blue!100!black!80}
+\colorlet{comment}{gray!90!black!90}
+\lstdefinestyle{vhdl}{
+   language     = VHDL,
+   basicstyle   = \footnotesize\ttfamily,
+   keywordstyle = \color{keyword}\bfseries,
+   commentstyle = \color{comment},
+}
+\lstdefinestyle{cpp}{
+  language=C++,
+  basicstyle   = \footnotesize\ttfamily,
+  keywordstyle=\color{blue}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  commentstyle=\color{green}\ttfamily,
+  morecomment=[l][\color{magenta}],
+}
+
+\lstdefinestyle{python}{
+  language=Python,
+  basicstyle   = \footnotesize\ttfamily,
+  keywordstyle=\color{blue}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  commentstyle=\color{green}\ttfamily,
+  morecomment=[l][\color{magenta}],
+}
+
+\begin{document}
+
+\include{titlepage}
+
+\section{Abstract}
+
+This report presents summary of my work done over problem set 6
+during ,,Embedded Security Systems'' course Summer semester 2018/2019.
+
+\include{problem-set-6}
+
+\section{Summary}
+As a summary of the Android related work in the problem set 6, I must say that the whole ,,Android App Reverse Engineering'' webpage is a bunch of very useful and practical resources and examples of how to reverse engineer Android app. Actually, I think I will use the knowledge obtained during exercises in the immediate future, as I need to reverse engineer some application to get a bunch of endpoints that it calls. At first I thought I'd need to set up some monitoring on the network where the communication occurs (still needed to bypass encryption), but thanks to this task now I know how to easily decompile and reverse engineer Android app using tools from exercise. I hope that application I'd like to reverse won't be either some ,,JS-in-native'' or ,,fully-compiled C++'' based.
+
+\end{document}
